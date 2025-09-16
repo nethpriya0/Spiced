@@ -1,0 +1,24 @@
+{
+  "name": "spice-platform-monorepo",
+  "version": "1.0.0",
+  "description": "Decentralized Spice Platform - A Web3 marketplace for transparent spice provenance",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspace=apps/nextjs",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "contracts:compile": "npm run compile --workspace=packages/contracts",
+    "contracts:deploy": "npm run deploy --workspace=packages/contracts",
+    "contracts:deploy:sepolia": "cd packages/contracts && npx hardhat run scripts/deploy.ts --network sepolia",
+    "contracts:test": "npm run test --workspace=packages/contracts",
+    "contracts:node": "npm run node --workspace=packages/contracts"
+  },
+  "keywords": ["web3", "blockchain", "marketplace", "spice", "provenance"],
+  "author": "Spiced3.0 Team",
+  "license": "MIT"
+}

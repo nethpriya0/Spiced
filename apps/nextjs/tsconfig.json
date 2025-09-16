@@ -1,0 +1,23 @@
+{
+  "extends": "@spice/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./src/*"],
+      "@spice/types": ["../../packages/types/src"],
+      "@spice/ui": ["../../packages/ui/src"]
+    },
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    ".eslintrc.cjs",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.mjs",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
