@@ -3,18 +3,16 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  ArrowRight,
-  Shield,
-  Users,
-  Leaf,
-  ShoppingCart,
-  CheckCircle,
-  Star,
-  Globe,
-  TrendingUp,
-  MapPin
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Shield } from "lucide-react";
+import { Users } from "lucide-react";
+import { Leaf } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import { Star } from "lucide-react";
+import { Globe } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 export default function Home() {
   const features = [

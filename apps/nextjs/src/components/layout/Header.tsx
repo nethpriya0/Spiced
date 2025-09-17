@@ -3,7 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAccount } from 'wagmi';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Leaf, ShoppingBag, User } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { X } from 'lucide-react';
+import { Leaf } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import { User } from 'lucide-react';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

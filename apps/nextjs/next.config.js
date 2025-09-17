@@ -49,7 +49,7 @@ const config = {
   
   experimental: {
     // optimizeCss: true, // Disabled due to missing critters dependency
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    optimizePackageImports: ['framer-motion'],
     turbo: {
       rules: {
         '*.svg': {
