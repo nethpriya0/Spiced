@@ -3,15 +3,15 @@ import { Mail, UserPlus, LogIn, CheckCircle } from 'lucide-react'
 import { simpleEmailAuthService } from '@/lib/auth/SimpleEmailAuthService'
 
 interface SimpleEmailAuthProps {
-  onSuccess: (result: { address: string; userInfo: any }) => void
+  onSubmit: (email: string, name?: string, isRegistering?: boolean) => Promise<void>
   onError: (error: string) => void
+  isLoading?: boolean
 }
 
-export function SimpleEmailAuth({ onSuccess, onError }: SimpleEmailAuthProps) {
+export function SimpleEmailAuth({ onSubmit, onError, isLoading = false }: SimpleEmailAuthProps) {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [isLogin, setIsLogin] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,28 +26,11 @@ export function SimpleEmailAuth({ onSuccess, onError }: SimpleEmailAuthProps) {
       return
     }
 
-    setIsLoading(true)
-    
     try {
-      let result
-      
-      if (isLogin) {
-        console.log('📧 [SimpleEmailAuth] Starting login for:', email)
-        result = await simpleEmailAuthService.login(email)
-      } else {
-        console.log('📧 [SimpleEmailAuth] Starting registration for:', email)
-        result = await simpleEmailAuthService.register(email, name)
-      }
-      
-      console.log('✅ [SimpleEmailAuth] Authentication successful')
-      onSuccess({
-        address: result.address,
-        userInfo: result.userInfo
-      })
-      
+      await onSubmit(email, name, !isLogin)
     } catch (error: any) {
       console.error('❌ [SimpleEmailAuth] Authentication failed:', error)
-      
+
       // Handle specific errors
       if (error.message?.includes('already exists')) {
         onError('An account with this email already exists. Please use login instead.')
@@ -58,8 +41,6 @@ export function SimpleEmailAuth({ onSuccess, onError }: SimpleEmailAuthProps) {
       } else {
         onError(error.message || 'Authentication failed. Please try again.')
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 

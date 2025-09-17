@@ -160,6 +160,18 @@ export function LogHarvestChatbot({
     )
   }
 
+  // Handle confirm button click
+  const handleConfirmHarvest = async () => {
+    addMessage("✅ Confirmed", 'user')
+    await advanceConversation("confirm")
+  }
+
+  // Handle edit button click
+  const handleEditHarvest = async () => {
+    addMessage("✏️ I want to make changes", 'user')
+    await advanceConversation("edit")
+  }
+
   // Handle photo upload
   const handlePhotoUpload = async (file: File) => {
     const imagePreview = URL.createObjectURL(file)
@@ -220,7 +232,7 @@ export function LogHarvestChatbot({
               </div>
             </div>
           </div>
-          <p className="mt-3">Does everything look correct? Type &quot;confirm&quot; to create your digital passport on the blockchain!</p>
+          <p className="mt-3">Does everything look correct?</p>
         </div>,
         1500
       )
@@ -235,8 +247,8 @@ export function LogHarvestChatbot({
       case 'welcome':
         setConversationState(prev => ({ ...prev, step: 'spice-type' }))
         await sendBotMessage(
-          "Wonderful! Let's create your first digital passport. This creates an immutable record of your harvest that buyers can verify. First, what type of spice did you harvest?",
-          1500
+          "Great! What spice did you harvest?",
+          800
         )
         break
 
@@ -257,8 +269,8 @@ export function LogHarvestChatbot({
         break
 
       case 'review-harvest':
-        if (userInput.toLowerCase().includes('confirm') || 
-            userInput.toLowerCase().includes('yes') || 
+        if (userInput.toLowerCase().includes('confirm') ||
+            userInput.toLowerCase().includes('yes') ||
             userInput.toLowerCase().includes('looks good')) {
           
           setConversationState(prev => ({ 
@@ -286,9 +298,11 @@ export function LogHarvestChatbot({
             
             // Store batch ID in conversation state for success message
             const sequencePart = batchId.split('-')[2]
-            setConversationState(prev => ({ 
-              ...prev, 
-              batchId: sequencePart ? parseInt(sequencePart) : 1 // Extract numeric sequence
+            setConversationState(prev => ({
+              ...prev,
+              step: 'success',
+              batchId: sequencePart ? parseInt(sequencePart) : 1, // Extract numeric sequence
+              isLoading: false
             }))
           } catch (error) {
             setConversationState(prev => ({ 
@@ -305,9 +319,15 @@ export function LogHarvestChatbot({
             
             onError?.(error instanceof Error ? error.message : 'Unknown error')
           }
-        } else {
+        } else if (userInput.toLowerCase().includes('edit') ||
+                   userInput.toLowerCase().includes('change')) {
           await sendBotMessage(
             "No problem! What would you like to change? You can tell me which part you'd like to update and we'll go back to fix that.",
+            800
+          )
+        } else {
+          await sendBotMessage(
+            "I didn't quite understand that. Please use the buttons below to confirm or make changes to your harvest.",
             800
           )
         }
@@ -318,10 +338,10 @@ export function LogHarvestChatbot({
         break
 
       case 'success':
-        const batchIdDisplay = conversationState.batchId 
-          ? `Your batch ID is **${conversationState.batchId}**. ` 
+        const batchIdDisplay = conversationState.batchId
+          ? `Your batch ID is **${conversationState.batchId}**. `
           : ''
-        
+
         await sendBotMessage(
           `🎉 Congratulations! Your digital passport has been created successfully. ${batchIdDisplay}You can now view it on your dashboard and use the QR code for product tracking. Great job!`,
           1000
@@ -348,14 +368,14 @@ export function LogHarvestChatbot({
     if (conversationState.messages.length === 0) {
       const initializeChat = async () => {
         await sendBotMessage(
-          "🌾 Ready to create your first digital passport? This creates a permanent, verifiable record of your harvest that buyers can trust. It only takes a few minutes and gives your spice a unique identity on the blockchain. Let's get started!",
-          2000
+          "🌾 Let's log your harvest! Ready to start?",
+          1000
         )
       }
-      
+
       initializeChat()
     }
-  }, [conversationState.messages.length, sendBotMessage])
+  }, [conversationState.messages.length])
 
   const currentStep = conversationState.step
 
@@ -440,11 +460,25 @@ export function LogHarvestChatbot({
         )}
         
         {currentStep === 'review-harvest' && (
-          <ChatInput
-            onSend={handleUserMessage}
-            disabled={inputDisabled || conversationState.isLoading}
-            placeholder="Type 'confirm' to create your passport or tell me what to change..."
-          />
+          <div className="space-y-3">
+            <p className="text-sm text-gray-600 text-center">Review your harvest details above</p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleConfirmHarvest}
+                disabled={inputDisabled || conversationState.isLoading}
+                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                ✅ Create Passport
+              </button>
+              <button
+                onClick={handleEditHarvest}
+                disabled={inputDisabled || conversationState.isLoading}
+                className="flex-1 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                ✏️ Make Changes
+              </button>
+            </div>
+          </div>
         )}
         
         {currentStep === 'welcome' && (

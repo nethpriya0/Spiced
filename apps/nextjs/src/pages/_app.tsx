@@ -1,12 +1,12 @@
 import { type AppType } from "next/app";
 import { Inter } from "next/font/google";
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ToastContainer } from "@/components/common/Toast";
-// import { PerformanceMonitor } from "@/components/monitoring/PerformanceMonitor";
-import { useToast } from "@/hooks/useToast";
+import { wagmiConfig } from '@/lib/wagmi-config';
 
 import { api } from "~/utils/api";
-
 import "~/styles/globals.css";
 
 const inter = Inter({
@@ -14,13 +14,27 @@ const inter = Inter({
   variable: "--font-sans",
 });
 
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+    },
+  },
+});
+
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ErrorBoundary>
-      <div className={`font-sans ${inter.variable}`}>
-        <Component {...pageProps} />
-        <ToastContainer toasts={[]} onRemoveToast={() => {}} />
-      </div>
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={wagmiConfig}>
+          <div className={`font-sans ${inter.variable}`}>
+            <Component {...pageProps} />
+            <ToastContainer toasts={[]} onRemoveToast={() => {}} />
+          </div>
+        </WagmiProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 };

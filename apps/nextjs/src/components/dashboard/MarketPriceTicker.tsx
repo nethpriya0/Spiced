@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -35,14 +36,17 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
   className 
 }) => {
   const [prices, setPrices] = useState<MarketPrice[]>([])
+  const [previousPrices, setPreviousPrices] = useState<MarketPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
-  // Generate mock market data based on completed transactions
-  const generateMockPrices = (): MarketPrice[] => {
-    const spiceTypes = farmerSpiceTypes.length > 0 
-      ? farmerSpiceTypes 
+  // Generate realistic market data with price continuity
+  const generateMockPrices = (usePreviousPrices = false): MarketPrice[] => {
+    const spiceTypes = farmerSpiceTypes.length > 0
+      ? farmerSpiceTypes
       : ['Ceylon Cinnamon', 'Black Pepper', 'Cardamom', 'Cloves', 'Nutmeg']
 
     return spiceTypes.map(spiceType => {
@@ -57,14 +61,34 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
         'Turmeric': 28
       }[spiceType] || 35
 
-      // Calculate average of last 10 transactions (simulated)
-      const transactions = Math.floor(Math.random() * 15) + 5 // 5-20 transactions
-      const variance = (Math.random() - 0.5) * 0.2 // ±10% variance
-      const currentPrice = basePrice * (1 + variance)
-      const previousPrice = basePrice * (1 + (Math.random() - 0.5) * 0.15)
+      let currentPrice: number
+      let previousPrice: number
+
+      if (usePreviousPrices && previousPrices.length > 0) {
+        // Use previous price as base for realistic movement
+        const prevPriceData = previousPrices.find(p => p.spiceType === spiceType)
+        if (prevPriceData) {
+          previousPrice = prevPriceData.currentPrice
+          // Small realistic movements: ±0.5% to ±3%
+          const movement = (Math.random() - 0.5) * 0.06 // ±3% max
+          currentPrice = previousPrice * (1 + movement)
+        } else {
+          // Fallback to base calculation
+          const variance = (Math.random() - 0.5) * 0.1
+          currentPrice = basePrice * (1 + variance)
+          previousPrice = currentPrice * (1 + (Math.random() - 0.5) * 0.02)
+        }
+      } else {
+        // Initial price generation
+        const variance = (Math.random() - 0.5) * 0.2
+        currentPrice = basePrice * (1 + variance)
+        previousPrice = currentPrice * (1 + (Math.random() - 0.5) * 0.05)
+      }
+
       const change = currentPrice - previousPrice
       const changePercentage = (change / previousPrice) * 100
-      
+      const transactions = Math.floor(Math.random() * 15) + 5
+
       return {
         spiceType,
         currentPrice: Number(currentPrice.toFixed(2)),
@@ -72,8 +96,8 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
         change: Number(change.toFixed(2)),
         changePercentage: Number(changePercentage.toFixed(1)),
         volume: Math.floor(Math.random() * 500) + 50,
-        lastUpdated: new Date(Date.now() - Math.random() * 3600000), // Within last hour
-        trend: change > 1 ? 'up' : change < -1 ? 'down' : 'stable',
+        lastUpdated: new Date(),
+        trend: Math.abs(change) < 0.01 ? 'stable' : change > 0 ? 'up' : 'down',
         transactions,
         symbol: spiceType.replace(/\s+/g, '').slice(0, 3).toUpperCase()
       }
@@ -81,22 +105,45 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
   }
 
   useEffect(() => {
-    const loadPrices = async () => {
-      setLoading(true)
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
-      setPrices(generateMockPrices())
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const loadPrices = async (isInitial = false) => {
+      if (isInitial) {
+        setLoading(true)
+        // Simulate API delay for initial load
+        await new Promise(resolve => setTimeout(resolve, 800))
+      } else {
+        setIsUpdating(true)
+        // Brief update indicator
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+
+      // Store current prices as previous before updating
+      setPreviousPrices(current => current.length > 0 ? current : [])
+
+      const newPrices = generateMockPrices(!isInitial)
+      setPrices(newPrices)
+      setPreviousPrices(newPrices)
       setLastRefresh(new Date())
-      setLoading(false)
+
+      if (isInitial) {
+        setLoading(false)
+      } else {
+        setIsUpdating(false)
+      }
     }
 
-    loadPrices()
+    // Initial load
+    loadPrices(true)
 
-    // Auto-refresh every 5 minutes as per requirements
-    const interval = setInterval(loadPrices, 5 * 60 * 1000)
-    return () => clearInterval(interval)
+    // Real-time updates every 15 seconds for more dynamic feel
+    const realTimeInterval = setInterval(() => loadPrices(false), 15 * 1000)
+
+    return () => {
+      clearInterval(realTimeInterval)
+    }
   }, [farmerSpiceTypes])
 
   // Cycle through prices for compact display
@@ -109,9 +156,15 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
     }
   }, [compact, prices.length])
 
-  const handleRefresh = () => {
-    setPrices(generateMockPrices())
+  const handleRefresh = async () => {
+    setIsUpdating(true)
+    await new Promise(resolve => setTimeout(resolve, 300))
+
+    setPreviousPrices(prices)
+    const newPrices = generateMockPrices(true)
+    setPrices(newPrices)
     setLastRefresh(new Date())
+    setIsUpdating(false)
   }
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
@@ -161,16 +214,21 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
       <div className={`bg-white rounded-lg border border-gray-200 shadow-sm p-4 ${className || ''}`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div className={`h-2 w-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-ping' : 'bg-green-500 animate-pulse'}`}></div>
             <h4 className="text-sm font-medium text-gray-900">Live Market</h4>
+            {isUpdating && <span className="text-xs text-orange-600 font-medium">Updating...</span>}
           </div>
           <div className="flex items-center gap-2">
+            <div className="text-xs text-gray-500">
+              {isMounted ? `${Math.floor((Date.now() - lastRefresh.getTime()) / 1000)}s ago` : '0s ago'}
+            </div>
             <button
               onClick={handleRefresh}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              disabled={isUpdating}
+              className={`p-1 transition-colors ${isUpdating ? 'text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
               title="Refresh prices"
             >
-              <RefreshCw className="h-3 w-3" />
+              <RefreshCw className={`h-3 w-3 ${isUpdating ? 'animate-spin' : ''}`} />
             </button>
             {prices.length > 1 && (
               <div className="flex gap-1">
@@ -226,24 +284,33 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
         <div className="flex items-center gap-3">
           <BarChart3 className="h-6 w-6 text-orange-600" />
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">Market Prices</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-gray-900">Market Prices</h3>
+              <div className={`h-2 w-2 rounded-full ${isUpdating ? 'bg-orange-500 animate-ping' : 'bg-green-500 animate-pulse'}`}></div>
+              {isUpdating && <span className="text-sm text-orange-600 font-medium">Updating...</span>}
+            </div>
             <p className="text-sm text-gray-600">
-              Average prices from last 10 completed transactions
+              Real-time prices • Updates every 15 seconds
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="text-right text-xs text-gray-500">
-            <div>Auto-updates</div>
+            <div>Last update</div>
             <div>{lastRefresh.toLocaleTimeString()}</div>
           </div>
           <button
             onClick={handleRefresh}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors border border-gray-200 rounded-lg hover:bg-gray-50"
+            disabled={isUpdating}
+            className={`p-2 transition-colors border border-gray-200 rounded-lg ${
+              isUpdating
+                ? 'text-gray-300 bg-gray-50'
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+            }`}
             title="Refresh prices"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -309,11 +376,12 @@ export const MarketPriceTicker: React.FC<MarketPriceTickerProps> = ({
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>Prices calculated from completed escrow transactions</span>
+            <Activity className="h-4 w-4" />
+            <span>Live prices from completed escrow transactions</span>
           </div>
-          <div>
-            Auto-refreshes every 5 minutes
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
+            <span>Real-time updates every 15s</span>
           </div>
         </div>
       </div>

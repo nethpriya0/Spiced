@@ -64,16 +64,33 @@ export class SimpleEmailAuthService {
 
   private storeUser(user: SimpleEmailUser): void {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(user))
+      console.log(`💾 [SimpleEmailAuth] Storing user:`, user.email)
+
+      // Store in both general and user-specific storage
+      const userJson = JSON.stringify(user)
+      localStorage.setItem(this.storageKey, userJson)
+      localStorage.setItem(`simple_email_user_${user.email}`, userJson)
       this.currentUser = user
+
+      console.log(`✅ [SimpleEmailAuth] User stored with keys:`)
+      console.log(`  - General: ${this.storageKey}`)
+      console.log(`  - Specific: simple_email_user_${user.email}`)
     } catch (error) {
       console.warn('Failed to store user:', error)
     }
   }
 
   private clearStoredUser(): void {
-    localStorage.removeItem(this.storageKey)
-    this.currentUser = null
+    try {
+      // Clear both storage locations
+      if (this.currentUser?.email) {
+        localStorage.removeItem(`simple_email_user_${this.currentUser.email}`)
+      }
+      localStorage.removeItem(this.storageKey)
+      this.currentUser = null
+    } catch (error) {
+      console.warn('Failed to clear stored user:', error)
+    }
   }
 
   // Generate a deterministic wallet address from email
@@ -125,6 +142,14 @@ export class SimpleEmailAuthService {
 
       // Store user locally
       this.storeUser(user)
+
+      // Verify storage immediately after storing
+      const storedUser = this.getStoredUserByEmail(user.email)
+      if (storedUser) {
+        console.log(`✅ [SimpleEmailAuth] User storage verified successfully`)
+      } else {
+        console.error(`❌ [SimpleEmailAuth] User storage verification failed!`)
+      }
 
       // Create wallet client
       const walletClient = this.createWalletClient(address)
@@ -243,10 +268,39 @@ export class SimpleEmailAuthService {
 
   private getStoredUserByEmail(email: string): SimpleEmailUser | null {
     try {
-      const stored = localStorage.getItem(`simple_email_user_${email}`)
+      console.log(`🔍 [SimpleEmailAuth] Looking for user with email: ${email}`)
+
+      // First check the user-specific key
+      const userSpecificKey = `simple_email_user_${email}`
+      let stored = localStorage.getItem(userSpecificKey)
+      console.log(`📋 [SimpleEmailAuth] User-specific key (${userSpecificKey}):`, !!stored)
+
       if (stored) {
-        return JSON.parse(stored)
+        const user = JSON.parse(stored)
+        console.log(`✅ [SimpleEmailAuth] Found user in user-specific storage:`, user.email)
+        return user
       }
+
+      // Fallback: check if current user matches the email
+      stored = localStorage.getItem(this.storageKey)
+      console.log(`📋 [SimpleEmailAuth] General key (${this.storageKey}):`, !!stored)
+
+      if (stored) {
+        const user = JSON.parse(stored)
+        console.log(`📋 [SimpleEmailAuth] General storage user email:`, user.email)
+        if (user.email === email) {
+          console.log(`✅ [SimpleEmailAuth] Found matching user in general storage, migrating...`)
+          // Migrate to user-specific storage
+          localStorage.setItem(userSpecificKey, stored)
+          return user
+        }
+      }
+
+      // Debug: Show all localStorage keys that might contain user data
+      const allKeys = Object.keys(localStorage).filter(key => key.includes('simple_email_user'))
+      console.log(`📋 [SimpleEmailAuth] All user-related keys in localStorage:`, allKeys)
+
+      console.log(`❌ [SimpleEmailAuth] No user found for email: ${email}`)
       return null
     } catch (error) {
       console.warn('Failed to get stored user:', error)

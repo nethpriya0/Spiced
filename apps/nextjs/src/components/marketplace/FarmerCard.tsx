@@ -23,7 +23,7 @@ const getFarmerProfile = (address: string, name: string) => {
     '0x1234567890123456789012345678901234567890': {
       name: 'Rajesh Silva',
       bio: 'Third-generation spice farmer with 25+ years of experience in Ceylon cinnamon cultivation. Committed to sustainable farming practices and maintaining the highest quality standards.',
-      profileImage: '/images/farmers/rajesh-silva.jpg',
+      profileImage: '👨‍🌾',
       reputationScore: 4.8,
       totalProducts: 47,
       verificationStatus: 'verified' as const,
@@ -35,7 +35,7 @@ const getFarmerProfile = (address: string, name: string) => {
     '0x2345678901234567890123456789012345678901': {
       name: 'Kumari Fernando',
       bio: 'Passionate organic farmer specializing in premium black pepper. Uses traditional methods passed down through generations while incorporating modern sustainable practices.',
-      profileImage: '/images/farmers/kumari-fernando.jpg',
+      profileImage: '👩‍🌾',
       reputationScore: 4.9,
       totalProducts: 32,
       verificationStatus: 'verified' as const,
@@ -49,7 +49,7 @@ const getFarmerProfile = (address: string, name: string) => {
   return profiles[address as keyof typeof profiles] || {
     name,
     bio: 'Dedicated spice farmer committed to producing authentic, high-quality Sri Lankan spices using sustainable and traditional farming methods.',
-    profileImage: '/images/farmers/default.jpg',
+    profileImage: '👨‍🌾',
     reputationScore: 4.5,
     totalProducts: 15,
     verificationStatus: 'verified' as const,

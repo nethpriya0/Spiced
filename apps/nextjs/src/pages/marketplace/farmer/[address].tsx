@@ -26,8 +26,8 @@ const getFarmerProfile = (address: string) => {
     '0x1234567890123456789012345678901234567890': {
       name: 'Rajesh Silva',
       bio: 'Third-generation spice farmer with over 25 years of experience in Ceylon cinnamon cultivation. My family has been farming in the Kandy hills for generations, and we are committed to sustainable farming practices that preserve both the environment and the traditional methods passed down through our ancestors. We specialize in premium grade Ceylon cinnamon, known worldwide for its sweet flavor and delicate aroma.',
-      profileImage: '/images/farmers/rajesh-silva.jpg',
-      coverImage: '/images/farmers/rajesh-plantation.jpg',
+      profileImage: '👨‍🌾',
+      coverImage: '🌿',
       reputationScore: 4.8,
       totalProducts: 47,
       totalSales: 156,
@@ -51,8 +51,8 @@ const getFarmerProfile = (address: string) => {
     '0x2345678901234567890123456789012345678901': {
       name: 'Kumari Fernando',
       bio: 'Passionate organic farmer specializing in premium black pepper cultivation. I believe in sustainable farming practices that protect our environment while producing the finest quality spices. My pepper plantation uses traditional fermentation methods that have been perfected over generations.',
-      profileImage: '/images/farmers/kumari-fernando.jpg',
-      coverImage: '/images/farmers/kumari-plantation.jpg',
+      profileImage: '👩‍🌾',
+      coverImage: '🌶️',
       reputationScore: 4.9,
       totalProducts: 32,
       totalSales: 89,
@@ -78,8 +78,8 @@ const getFarmerProfile = (address: string) => {
   return profiles[address as keyof typeof profiles] || {
     name: 'Unknown Farmer',
     bio: 'Dedicated spice farmer committed to producing authentic, high-quality Sri Lankan spices using sustainable and traditional farming methods.',
-    profileImage: '/images/farmers/default.jpg',
-    coverImage: '/images/farmers/default-plantation.jpg',
+    profileImage: '👨‍🌾',
+    coverImage: '🌿',
     reputationScore: 4.5,
     totalProducts: 15,
     totalSales: 45,

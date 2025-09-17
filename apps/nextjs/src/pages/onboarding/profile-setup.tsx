@@ -4,7 +4,9 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { ArrowLeft, ArrowRight, Upload, User, FileText, Camera, CheckCircle, Loader } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { useAuthStore } from '@/lib/auth/authStore'
 import { farmerRegistryService } from '@/lib/contracts/FarmerRegistryService'
+import { mockFarmerRegistryService } from '@/lib/contracts/MockFarmerRegistryService'
 import { type Address } from 'viem'
 import { IPFSService } from '@/lib/ipfs/IPFSService'
 
@@ -28,6 +30,7 @@ type Step = 'personal' | 'experience' | 'specialties' | 'photo' | 'review' | 'su
 
 export default function ProfileSetupPage() {
   const { user, walletClient, isAuthenticated, isLoading } = useAuth()
+  const { setUser } = useAuthStore()
   const router = useRouter()
   
   // State management
@@ -44,13 +47,65 @@ export default function ProfileSetupPage() {
   const [error, setError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
-  // Authentication check
+  // Authentication check with debugging
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || !user)) {
-      router.push('/login?role=farmer')
+    console.log('🔍 [ProfileSetup] Auth state check:', {
+      isLoading,
+      isAuthenticated,
+      hasUser: !!user,
+      userEmail: user?.email
+    })
+
+    // Wait for auth initialization to complete
+    if (isLoading) {
+      console.log('⏳ [ProfileSetup] Auth still loading, waiting...')
       return
     }
+
+    // Check authentication with a small delay to ensure state is synced
+    const checkAuth = () => {
+      if (!isAuthenticated || !user) {
+        console.log('❌ [ProfileSetup] Not authenticated, redirecting to login')
+        router.push('/login?role=farmer')
+        return
+      }
+      console.log('✅ [ProfileSetup] User authenticated:', user.email)
+    }
+
+    // Small delay to ensure auth state is properly synced after registration
+    const timeout = setTimeout(checkAuth, 100)
+    return () => clearTimeout(timeout)
   }, [isAuthenticated, isLoading, user, router])
+
+  // Initialize profile data with user information
+  useEffect(() => {
+    if (user && !profileData.name) {
+      console.log('📝 [ProfileSetup] Initializing profile with user data:', user)
+      updateProfileData({
+        name: user.name || '',
+        location: '' // Will be filled by user
+      })
+    }
+  }, [user, profileData.name])
+
+  // Restore wallet client if missing but user is authenticated
+  useEffect(() => {
+    const restoreWalletClient = async () => {
+      if (user && !walletClient && user.email && isAuthenticated) {
+        console.log('🔄 [ProfileSetup] Wallet client missing on mount, attempting to restore...')
+        try {
+          const { authService } = await import('@/lib/auth/AuthService')
+          const result = await authService.loginWithEmail(user.email)
+          // The wallet client should be set through the auth hook automatically
+          console.log('✅ [ProfileSetup] Wallet client restoration initiated')
+        } catch (error) {
+          console.warn('⚠️ [ProfileSetup] Failed to restore wallet client on mount:', error)
+        }
+      }
+    }
+
+    restoreWalletClient()
+  }, [user, walletClient, isAuthenticated])
 
   // Update profile data
   const updateProfileData = (updates: Partial<ProfileData>) => {
@@ -149,13 +204,68 @@ export default function ProfileSetupPage() {
 
   // Submit profile
   const submitProfile = async () => {
-    if (!user?.address || !walletClient) {
-      setError('Authentication required')
+    console.log('🚀 [ProfileSetup] Starting profile submission...')
+    console.log('📋 [ProfileSetup] Auth state:', {
+      hasUser: !!user,
+      userAddress: user?.address,
+      hasWalletClient: !!walletClient,
+      userEmail: user?.email
+    })
+
+    // Debug: Check what's actually in localStorage
+    console.log('📋 [ProfileSetup] All localStorage keys:', Object.keys(localStorage))
+    console.log('📋 [ProfileSetup] Zustand auth storage:', localStorage.getItem('spice-auth-storage'))
+    const allSimpleEmailKeys = Object.keys(localStorage).filter(key => key.includes('simple_email'))
+    console.log('📋 [ProfileSetup] All simple email keys:', allSimpleEmailKeys)
+
+    if (!user?.address) {
+      console.error('❌ [ProfileSetup] No user address available')
+      setError('Authentication required - no user address')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
+
+    // Ensure wallet client is available - recreate directly from user data
+    let currentWalletClient = walletClient
+    if (!currentWalletClient) {
+      console.log('🔄 [ProfileSetup] Wallet client missing, creating new one from user data...')
+      try {
+        // Import SimpleEmailAuthService to create wallet client directly
+        const { SimpleEmailAuthService } = await import('@/lib/auth/SimpleEmailAuthService')
+        const emailAuthService = SimpleEmailAuthService.getInstance()
+
+        // Create wallet client using the user's address
+        const { createWalletClient, http } = await import('viem')
+        const { sepolia, localhost } = await import('viem/chains')
+
+        const chain = process.env.NEXT_PUBLIC_CHAIN_ID === '11155111' ? sepolia : localhost
+        const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || 'http://127.0.0.1:8545'
+
+        currentWalletClient = createWalletClient({
+          account: user.address,
+          chain,
+          transport: http(rpcUrl)
+        })
+
+        console.log('✅ [ProfileSetup] Wallet client created successfully from user address')
+      } catch (error) {
+        console.error('❌ [ProfileSetup] Failed to create wallet client:', error)
+        setError('Failed to create wallet connection. Please refresh and try again.')
+        setIsSubmitting(false)
+        return
+      }
+    }
+
+    if (!currentWalletClient) {
+      console.error('❌ [ProfileSetup] No wallet client available after creation attempt')
+      setError('Wallet connection required. Please refresh and try again.')
+      setIsSubmitting(false)
+      return
+    }
+
+    console.log('🚀 [ProfileSetup] Starting profile submission process...')
 
     try {
       let profilePictureHash = ''
@@ -163,13 +273,21 @@ export default function ProfileSetupPage() {
       // Upload profile picture to IPFS if provided
       if (profileData.profilePicture) {
         try {
+          console.log('📤 [ProfileSetup] Uploading profile picture to IPFS...')
           const ipfsService = new IPFSService()
           profilePictureHash = await ipfsService.uploadFile(profileData.profilePicture)
-          console.log('✅ Profile picture uploaded to IPFS:', profilePictureHash)
+          console.log('✅ [ProfileSetup] Profile picture uploaded to IPFS:', profilePictureHash)
         } catch (ipfsError) {
-          console.warn('IPFS upload failed, continuing without profile picture:', ipfsError)
+          console.warn('⚠️ [ProfileSetup] IPFS upload failed, continuing without profile picture:', ipfsError)
         }
       }
+
+      console.log('📋 [ProfileSetup] Profile data prepared:', {
+        name: profileData.name,
+        location: profileData.location,
+        specialties: profileData.specialties.length,
+        hasPicture: !!profilePictureHash
+      })
 
       // Create bio with additional information
       const fullBio = `${profileData.bio}
@@ -179,36 +297,50 @@ Experience: ${profileData.experience}
 Specialties: ${profileData.specialties.join(', ')}`
 
       // Check if we're in development mode
-      if (process.env.NODE_ENV === 'development' || 
+      if (process.env.NODE_ENV === 'development' ||
           !process.env.NEXT_PUBLIC_DIAMOND_PROXY_ADDRESS ||
           process.env.NEXT_PUBLIC_DIAMOND_PROXY_ADDRESS === '0x5FbDB2315678afecb367f032d93F642f64180aa3') {
-        // Development mode - simulate successful registration
-        console.log('🔧 Development mode: Simulating farmer registration')
-        console.log('Profile data:', {
-          name: profileData.name,
-          bio: fullBio,
+        // Development mode - use mock registration service
+        console.log('🔧 Development mode: Using mock farmer registration')
+
+        const txHash = await mockFarmerRegistryService.registerFarmer(
+          user.address as Address,
+          profileData.name,
+          fullBio,
+          profileData.location,
           profilePictureHash
-        })
-        
-        // Simulate processing time
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
+        )
+
+        console.log('✅ [ProfileSetup] Mock registration completed:', txHash)
+
         // Mark profile as complete in localStorage
+        console.log('💾 [ProfileSetup] Saving profile completion to localStorage')
         localStorage.setItem('user_profile_complete', 'true')
+        localStorage.setItem('farmer_registered', 'true')
+
+        // Update auth store to mark profile as complete
+        console.log('🔄 [ProfileSetup] Updating auth store user profileComplete flag')
+        const updatedUser = { ...user, profileComplete: true }
+        setUser(updatedUser)
+        console.log('✅ [ProfileSetup] Auth store user updated with profileComplete: true')
+
+        console.log('🎯 [ProfileSetup] Setting submitComplete to true')
         setSubmitComplete(true)
-        
+
         // Redirect to dashboard after a brief delay
+        console.log('🚀 [ProfileSetup] Scheduling redirect to dashboard in 3 seconds')
         setTimeout(() => {
+          console.log('🚀 [ProfileSetup] Executing redirect to dashboard')
           router.push('/dashboard')
         }, 3000)
-        
+
         return
       }
 
       // Production mode - register with smart contract
       farmerRegistryService.initialize({
         contractAddress: process.env.NEXT_PUBLIC_DIAMOND_PROXY_ADDRESS as Address,
-        walletClient
+        walletClient: currentWalletClient
       })
 
       const txHash = await farmerRegistryService.registerFarmer(
@@ -219,6 +351,13 @@ Specialties: ${profileData.specialties.join(', ')}`
 
       console.log('Profile registration transaction:', txHash)
       localStorage.setItem('user_profile_complete', 'true')
+
+      // Update auth store to mark profile as complete
+      console.log('🔄 [ProfileSetup] Updating auth store user profileComplete flag')
+      const updatedUser = { ...user, profileComplete: true }
+      setUser(updatedUser)
+      console.log('✅ [ProfileSetup] Auth store user updated with profileComplete: true')
+
       setSubmitComplete(true)
 
       // Wait for transaction confirmation and redirect
@@ -575,6 +714,42 @@ Specialties: ${profileData.specialties.join(', ')}`
       default:
         return null
     }
+  }
+
+  // Show loading while authentication is being checked
+  if (isLoading) {
+    return (
+      <>
+        <Head>
+          <title>Profile Setup - Spice Platform</title>
+          <meta name="description" content="Set up your farmer profile on the Spice Platform" />
+        </Head>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="h-8 w-8 text-spice-green animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading your profile...</p>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  // Don't render anything if not authenticated (redirect will happen)
+  if (!isAuthenticated || !user) {
+    return (
+      <>
+        <Head>
+          <title>Profile Setup - Spice Platform</title>
+          <meta name="description" content="Set up your farmer profile on the Spice Platform" />
+        </Head>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="h-8 w-8 text-spice-green animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Checking authentication...</p>
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (

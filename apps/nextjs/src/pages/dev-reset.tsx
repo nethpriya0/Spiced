@@ -35,13 +35,14 @@ function DevResetClientComponent() {
       // Clear all registration-related localStorage
       localStorage.removeItem('user_profile_complete')
       localStorage.removeItem('buyer_profile_complete')
+      localStorage.removeItem('farmer_registered')
       localStorage.clear()
       setProfileComplete(null)
     }
-    
+
     // Logout current user
     logout()
-    
+
     // Redirect to homepage
     router.push('/')
   }

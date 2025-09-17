@@ -6,7 +6,7 @@ import { useMyProducts } from '@/hooks/useMyProducts'
 // import { SealForSaleButton } from '@/components/finalization/SealForSaleButton'
 // import { useAuth } from '@/hooks/useAuth'
 // import { useWallet } from '@/hooks/useWallet'
-import { Package, Users, Star, TrendingUp, Lock, CheckCircle, ArrowRight } from 'lucide-react'
+import { Package, Users, Star, TrendingUp, Lock, CheckCircle, ArrowRight, Calendar, Activity, Eye, Bell, Cloud, Sun, CloudRain, Wind } from 'lucide-react'
 import { useRouter } from 'next/router'
 
 interface DashboardStatProps {
@@ -130,9 +130,100 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({ className }) => {
         <MarketPriceTicker />
       </div>
 
-      {/* Primary Call to Action */}
-      <div className="mb-10 animate-slide-in-up">
-        <LogHarvestButton />
+      {/* Quick Actions Panel */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-yellow-500 rounded-full"></div>
+          <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button
+            onClick={() => router.push('/harvest/log-new')}
+            className="bg-white p-4 rounded-xl border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-200 group"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors">
+                <Package className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="text-sm font-medium text-gray-900">Log Harvest</div>
+              <div className="text-xs text-gray-500 mt-1">Create passport</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/products')}
+            className="bg-white p-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 group"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 transition-colors">
+                <Eye className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="text-sm font-medium text-gray-900">View Products</div>
+              <div className="text-xs text-gray-500 mt-1">Manage inventory</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/marketplace')}
+            className="bg-white p-4 rounded-xl border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all duration-200 group"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 transition-colors">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="text-sm font-medium text-gray-900">Marketplace</div>
+              <div className="text-xs text-gray-500 mt-1">Browse & sell</div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/dashboard/analytics')}
+            className="bg-white p-4 rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200 group"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 transition-colors">
+                <TrendingUp className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="text-sm font-medium text-gray-900">Analytics</div>
+              <div className="text-xs text-gray-500 mt-1">View insights</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Grid Layout for Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        {/* Primary Call to Action */}
+        <div className="lg:col-span-2">
+          <LogHarvestButton />
+        </div>
+
+        {/* Weather Widget */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 border border-blue-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-blue-900">Today's Weather</h3>
+            <Sun className="h-6 w-6 text-yellow-500" />
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-bold text-blue-900">28°C</span>
+              <div className="text-right">
+                <div className="text-blue-700 font-medium">Partly Cloudy</div>
+                <div className="text-blue-600 text-sm">Perfect for farming</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-blue-200">
+              <div className="flex items-center gap-2">
+                <Wind className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-blue-700">12 km/h</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CloudRain className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-blue-700">20%</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Dashboard Stats */}
@@ -157,6 +248,67 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({ className }) => {
           ))}
         </div>
       </div>
+
+      {/* Recent Products Showcase */}
+      {passports.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+              <h2 className="text-xl font-bold text-gray-900">Recent Products</h2>
+            </div>
+            <button
+              onClick={() => router.push('/products')}
+              className="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1"
+            >
+              View All <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {passports.slice(0, 3).map((passport) => (
+              <div
+                key={passport.batchId}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                onClick={() => router.push(`/products/view/${passport.batchId}`)}
+              >
+                <div className="h-48 bg-gradient-to-br from-green-100 to-yellow-100 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                      <Package className="h-8 w-8 text-green-600" />
+                    </div>
+                    <div className="text-lg font-bold text-gray-700">{passport.spiceType}</div>
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-semibold text-gray-900">
+                      Batch #{passport.batchId}
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      passport.statusText === 'Locked'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {passport.statusText}
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-600 mb-3">
+                    Weight: {passport.weightInKg}kg
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{passport.processingStepCount} processing steps</span>
+                    <span>{new Date().toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Ready to Seal Section */}
       {sealingMetrics.readyToSeal > 0 && (
@@ -214,11 +366,128 @@ export const DashboardMain: React.FC<DashboardMainProps> = ({ className }) => {
         </div>
       )}
 
+      {/* Recent Activity and Progress Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Recent Activity */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Activity className="h-5 w-5 text-green-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+            </div>
+            <button
+              onClick={() => router.push('/activity')}
+              className="text-sm text-green-600 hover:text-green-700 font-medium"
+            >
+              View All
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {passports.slice(0, 3).map((passport, index) => (
+              <div key={passport.batchId} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Package className="h-4 w-4 text-green-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {passport.spiceType} harvest logged
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Batch #{passport.batchId} • {passport.weightInKg}kg
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {new Date().toLocaleDateString()}
+                  </p>
+                </div>
+                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  passport.statusText === 'Locked'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {passport.statusText}
+                </div>
+              </div>
+            ))}
+
+            {passports.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Activity className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm">No recent activity</p>
+                <p className="text-xs">Start by logging your first harvest</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Notifications & Alerts */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-orange-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+            </div>
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          </div>
+
+          <div className="space-y-4">
+            {sealingMetrics.readyToSeal > 0 && (
+              <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-green-900">
+                    Products Ready to Seal
+                  </p>
+                  <p className="text-xs text-green-700">
+                    {sealingMetrics.readyToSeal} product{sealingMetrics.readyToSeal !== 1 ? 's' : ''} ready for marketplace
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  Market Update
+                </p>
+                <p className="text-xs text-blue-700">
+                  Ceylon Cinnamon prices up 12% this week
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <Star className="h-5 w-5 text-purple-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-purple-900">
+                  Reputation Milestone
+                </p>
+                <p className="text-xs text-purple-700">
+                  You're close to reaching 4.5 stars! Keep up the great work.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Getting Started Section */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">
-          {sealingMetrics.totalProducts === 0 ? 'Getting Started' : 'Your Journey'}
-        </h3>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-slate-900">
+            {sealingMetrics.totalProducts === 0 ? 'Getting Started' : 'Your Journey'}
+          </h3>
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-500">Progress:</div>
+            <div className="w-24 bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(((sealingMetrics.totalProducts > 0 ? 1 : 0) + (sealingMetrics.sealed > 0 ? 1 : 0)) / 3 * 100, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className={`h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${

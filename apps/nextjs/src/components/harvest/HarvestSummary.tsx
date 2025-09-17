@@ -15,6 +15,7 @@ interface HarvestSummaryProps {
   harvestPhotoPreview?: string
   onNewHarvest?: () => void
   onViewDetails?: (batchId: string) => void
+  onBackToDashboard?: () => void
 }
 
 export function HarvestSummary({
@@ -28,7 +29,8 @@ export function HarvestSummary({
   contractAddress,
   harvestPhotoPreview,
   onNewHarvest,
-  onViewDetails
+  onViewDetails,
+  onBackToDashboard
 }: HarvestSummaryProps) {
   const displayWeight = convertWeight(harvestWeight, 'g', weightUnit)
   const weightLabel = `${displayWeight.toFixed(weightUnit === 'g' ? 0 : 2)} ${WEIGHT_UNITS[weightUnit].symbol}`
@@ -189,12 +191,19 @@ export function HarvestSummary({
       {/* Action Buttons */}
       <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
         <button
+          onClick={onBackToDashboard}
+          className="px-8 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+        >
+          📊 Back to Dashboard
+        </button>
+
+        <button
           onClick={() => onViewDetails?.(batchId)}
           className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
           View Full Details
         </button>
-        
+
         <button
           onClick={onNewHarvest}
           className="px-6 py-3 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"

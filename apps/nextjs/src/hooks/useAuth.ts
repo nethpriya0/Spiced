@@ -24,15 +24,19 @@ export function useAuth() {
   // Initialize Web3Auth on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      if (isInitialized) return
+      if (isInitialized) {
+        console.log('📋 [useAuth] Already initialized, skipping')
+        return
+      }
 
+      console.log('🔧 [useAuth] Starting authentication initialization...')
       setLoading(true)
       setError(null)
-      
+
       try {
-        console.log('Starting Web3Auth initialization...')
+        console.log('🔧 [useAuth] Calling authService.initialize()...')
         await authService.initialize()
-        console.log('Web3Auth initialization completed')
+        console.log('✅ [useAuth] Auth service initialization completed')
         setInitialized(true)
         
         // Check if user is already connected from previous session
@@ -41,36 +45,52 @@ export function useAuth() {
         
         if (isConnected) {
           console.log('📋 [useAuth] User appears to be connected, restoring session...')
-          const userInfo = await authService.getUserInfo()
-          console.log('📋 [useAuth] Retrieved user info:', !!userInfo)
-          
-          if (userInfo) {
-            // Recreate wallet client and user info for existing session
+
+          // Check if we have persisted user data
+          if (user) {
+            console.log('📋 [useAuth] Found persisted user data, recreating wallet client...')
             try {
-              const loginResult = await authService.login()
-              console.log('📋 [useAuth] Session restoration successful')
-              
-              const userData: User = {
-                address: loginResult.address,
-                email: userInfo.email as string,
-                name: userInfo.name as string,
-                profilePicture: userInfo.profileImage as string,
-                isVerified: true, // TODO: Fetch from FarmerRegistry contract
-                profileComplete: typeof window !== 'undefined' ? localStorage.getItem('user_profile_complete') === 'true' : false, // Check localStorage for profile completion
-                userInfo: userInfo
-              }
-              
-              setUser(userData)
+              // Try to recreate the wallet client for the existing user
+              const loginResult = await authService.loginWithEmail(user.email || '')
               setWalletClient(loginResult.walletClient)
-              console.log('✅ [useAuth] User session restored successfully')
-            } catch (loginError) {
-              console.warn('❌ [useAuth] Failed to restore existing session:', loginError)
-              // Clear any partial state and continue without auto-login
+              console.log('✅ [useAuth] Wallet client restored for existing user')
+            } catch (restoreError) {
+              console.warn('❌ [useAuth] Failed to restore wallet client:', restoreError)
+              // Clear invalid session
               setUser(null)
               setWalletClient(null)
             }
           } else {
-            console.log('📋 [useAuth] No user info available, skipping session restoration')
+            // Try to get user info and restore full session
+            const userInfo = await authService.getUserInfo()
+            console.log('📋 [useAuth] Retrieved user info:', !!userInfo)
+
+            if (userInfo) {
+              try {
+                const loginResult = await authService.login()
+                console.log('📋 [useAuth] Session restoration successful')
+
+                const userData: User = {
+                  address: loginResult.address,
+                  email: userInfo.email as string,
+                  name: userInfo.name as string,
+                  profilePicture: userInfo.profileImage as string,
+                  isVerified: true, // TODO: Fetch from FarmerRegistry contract
+                  profileComplete: typeof window !== 'undefined' ? localStorage.getItem('user_profile_complete') === 'true' : false,
+                  userInfo: userInfo
+                }
+
+                setUser(userData)
+                setWalletClient(loginResult.walletClient)
+                console.log('✅ [useAuth] User session restored successfully')
+              } catch (loginError) {
+                console.warn('❌ [useAuth] Failed to restore existing session:', loginError)
+                setUser(null)
+                setWalletClient(null)
+              }
+            } else {
+              console.log('📋 [useAuth] No user info available, skipping session restoration')
+            }
           }
         }
       } catch (error) {

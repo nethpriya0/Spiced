@@ -35,7 +35,7 @@ const navigationItems: NavigationItem[] = [
     name: 'My Products',
     href: '/products',
     icon: Package,
-    disabled: true // Future Epic 2 functionality
+    disabled: false // Enable for improved dashboard experience
   },
   {
     name: 'My Credentials',

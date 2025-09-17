@@ -8,6 +8,7 @@
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.ts --network sepolia",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "node": "hardhat node",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "clean": "hardhat clean"

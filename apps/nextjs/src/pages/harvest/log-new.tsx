@@ -154,6 +154,9 @@ const LogNewHarvestPage: NextPage = () => {
             onViewDetails={(batchId) => {
               router.push(`/harvest/view/${batchId}`)
             }}
+            onBackToDashboard={() => {
+              router.push('/dashboard')
+            }}
           />
         )}
 

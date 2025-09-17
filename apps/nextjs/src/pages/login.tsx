@@ -11,7 +11,7 @@ type UserRole = 'farmer' | 'buyer' | null
 type AuthMethod = 'email' | 'wallet' | null
 
 export default function LoginPage() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, loginWithEmail, registerWithEmail, error, user } = useAuth()
   const router = useRouter()
   const [selectedRole, setSelectedRole] = useState<UserRole>(null)
   const [selectedAuthMethod, setSelectedAuthMethod] = useState<AuthMethod>(null)
@@ -25,23 +25,62 @@ export default function LoginPage() {
     }
   }, [router.query])
 
-  // Handle authentication success
-  const handleAuthSuccess = (result: { address: string; userInfo: any }) => {
-    setAuthError(null)
-    
-    // Simple redirect based on role
-    if (selectedRole === 'farmer') {
-      router.push('/onboarding/profile-setup')
-    } else if (selectedRole === 'buyer') {
-      router.push('/marketplace')
-    } else {
-      router.push('/dashboard')
-    }
-  }
+  // Redirect if already authenticated
+  useEffect(() => {
+    console.log('🔍 [Login] Auth state change:', {
+      isAuthenticated,
+      selectedRole,
+      isLoading,
+      hasUser: !!user,
+      userEmail: user?.email
+    })
 
-  // Handle email authentication success
-  const handleEmailAuthSuccess = (result: { address: string; userInfo: any }) => {
-    handleAuthSuccess(result)
+    if (isAuthenticated && !isLoading) {
+      console.log(`🚀 [Login] Redirecting authenticated user (role: ${selectedRole})`)
+      if (selectedRole === 'farmer') {
+        router.push('/onboarding/profile-setup')
+      } else if (selectedRole === 'buyer') {
+        router.push('/marketplace')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }, [isAuthenticated, selectedRole, router, isLoading])
+
+  // Handle email authentication
+  const handleEmailAuth = async (email: string, name?: string, isRegistering = false) => {
+    setAuthError(null)
+
+    try {
+      if (isRegistering) {
+        console.log('🔑 [Login] Starting registration...')
+        await registerWithEmail(email, name)
+        console.log('✅ [Login] Registration successful')
+      } else {
+        console.log('🔑 [Login] Starting login...')
+        await loginWithEmail(email)
+        console.log('✅ [Login] Login successful')
+      }
+
+      // Force immediate redirect after successful authentication
+      console.log('🚀 [Login] Authentication successful, redirecting...')
+      setTimeout(() => {
+        if (selectedRole === 'farmer') {
+          console.log('🚀 [Login] Redirecting farmer to profile setup')
+          router.push('/onboarding/profile-setup')
+        } else if (selectedRole === 'buyer') {
+          console.log('🚀 [Login] Redirecting buyer to marketplace')
+          router.push('/marketplace')
+        } else {
+          console.log('🚀 [Login] Redirecting to dashboard')
+          router.push('/dashboard')
+        }
+      }, 100) // Small delay to ensure auth state is updated
+
+    } catch (error: any) {
+      console.error('❌ [Login] Authentication error:', error)
+      setAuthError(error.message || 'Authentication failed. Please try again.')
+    }
   }
 
   // Handle authentication errors
@@ -245,15 +284,16 @@ export default function LoginPage() {
         <span className="text-sm">Back to sign-in options</span>
       </button>
 
-      {authError && (
+      {(authError || error) && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {authError}
+          {authError || error}
         </div>
       )}
 
-      <SimpleEmailAuth 
-        onSuccess={handleEmailAuthSuccess}
+      <SimpleEmailAuth
+        onSubmit={handleEmailAuth}
         onError={handleAuthError}
+        isLoading={isLoading}
       />
     </div>
   )

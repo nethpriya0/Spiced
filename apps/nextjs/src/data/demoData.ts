@@ -15,7 +15,7 @@ export const DEMO_FARMERS = [
     experience: "25 years",
     specialties: ["Ceylon Cinnamon", "White Pepper"],
     certifications: ["Organic", "Fair Trade", "EU Organic"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=sunil&backgroundColor=c0aede"
+    profileImage: "👨‍🌾"
   },
   {
     name: "Kamala Silva",
@@ -25,7 +25,7 @@ export const DEMO_FARMERS = [
     experience: "18 years",
     specialties: ["Black Pepper", "Cloves"],
     certifications: ["Organic", "Rainforest Alliance"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=kamala&backgroundColor=ffd5dc"
+    profileImage: "👩‍🌾"
   },
   {
     name: "Ranjan Fernando",
@@ -35,7 +35,7 @@ export const DEMO_FARMERS = [
     experience: "32 years",
     specialties: ["Cardamom", "Nutmeg"],
     certifications: ["Organic", "Bird Friendly", "Carbon Neutral"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=ranjan&backgroundColor=d4c5b9"
+    profileImage: "👨‍🌾"
   },
   {
     name: "Priyanka Mendis",
@@ -45,7 +45,7 @@ export const DEMO_FARMERS = [
     experience: "15 years",
     specialties: ["Nutmeg", "Mace", "Vanilla"],
     certifications: ["Organic", "Women's Cooperative"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=priyanka&backgroundColor=b6e5d8"
+    profileImage: "👩‍🌾"
   },
   {
     name: "Ajith Bandara",
@@ -55,7 +55,7 @@ export const DEMO_FARMERS = [
     experience: "22 years",
     specialties: ["Turmeric", "Ginger", "Lemongrass"],
     certifications: ["Organic", "Traditional Knowledge"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=mahesh&backgroundColor=a8e6cf"
+    profileImage: "👨‍🌾"
   },
   {
     name: "Nimal Rajapaksa",
@@ -65,7 +65,7 @@ export const DEMO_FARMERS = [
     experience: "28 years",
     specialties: ["Cloves", "Allspice"],
     certifications: ["Organic", "Heritage Seed Guardian"],
-    profileImage: "https://api.dicebear.com/7.x/avataaars/svg?seed=dilshan&backgroundColor=ffb3ba"
+    profileImage: "👨‍🌾"
   }
 ]
 
@@ -81,7 +81,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-15',
     sealedAt: '2024-01-20',
     description: 'Premium grade Ceylon cinnamon bark, hand-harvested from 300-year-old sustainable plantations in Matale district. This true cinnamon (Cinnamomum verum) features the distinctive sweet, delicate flavor that has made Sri Lankan cinnamon world-renowned for centuries.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=cinnamon&backgroundColor=d2b48c',
+    imageUrl: '🌿',
     verificationHash: '0xabcd1234ef567890abcd1234ef567890abcd1234',
     qualityGrade: 'A',
     processingMethod: 'Traditional sun-drying and hand-rolling technique passed down through generations',
@@ -109,7 +109,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-18',
     sealedAt: '2024-01-22',
     description: 'Aromatic black peppercorns with exceptionally high piperine content (7.2%), grown in the pristine hill country at 1200m elevation. Hand-picked at perfect ripeness and traditionally processed.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=pepper&backgroundColor=8b4513',
+    imageUrl: '🌶️',
     verificationHash: '0xefgh5678ij901234klmn5678op901234qr567890',
     qualityGrade: 'A+',
     processingMethod: 'Traditional sun-drying on raised bamboo mats for 7-10 days',
@@ -137,7 +137,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-20',
     sealedAt: '2024-01-25',
     description: 'Premium green cardamom pods (Elettaria cardamomum), hand-picked at peak ripeness when the pods are 75% mature. Each pod contains 8-12 highly aromatic seeds with intense, complex flavor profile.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=cardamom&backgroundColor=90ee90',
+    imageUrl: '💚',
     verificationHash: '0xijkl9012mn345678pqrs9012tu345678vw901234',
     qualityGrade: 'AA',
     processingMethod: 'Controlled low-temperature drying to preserve essential oils',
@@ -166,7 +166,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-12',
     sealedAt: '2024-01-18',
     description: 'Whole clove buds with exceptional eugenol content (18.2%), perfect for culinary and medicinal applications. Harvested when flower buds turn pink but before blooming.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=nutmeg&backgroundColor=daa520',
+    imageUrl: '🌰',
     verificationHash: '0xmnop3456qr789012stux3456yz789012ab345678',
     qualityGrade: 'A',
     processingMethod: 'Natural sun-drying on traditional palm leaf mats',
@@ -195,7 +195,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-25',
     sealedAt: '2024-01-30',
     description: 'Fresh nutmeg seeds with rich, warm flavor profile and high myristicin content. Grown in coastal groves where sea breezes create unique terroir characteristics.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=cloves&backgroundColor=8b0000',
+    imageUrl: '🥜',
     verificationHash: '0xqrst7890uv123456wxyz7890ab123456cd789012',
     qualityGrade: 'A+',
     processingMethod: 'Traditional 6-week slow-drying process',
@@ -225,7 +225,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-22',
     sealedAt: '2024-01-28',
     description: 'High-curcumin turmeric roots (6.8% curcumin content) organically grown without synthetic fertilizers. Ancient variety cultivated using traditional Ayurvedic methods.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=vanilla&backgroundColor=f5deb3',
+    imageUrl: '🟡',
     verificationHash: '0xuvwx1234yz567890efgh1234ij567890kl901234',
     qualityGrade: 'A',
     processingMethod: 'Clean washing, boiling, and traditional sun-drying',
@@ -254,7 +254,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-28',
     sealedAt: '2024-02-02',
     description: 'Rare white pepper from fully ripened peppercorns, traditional water-retting process. Milder heat than black pepper with complex floral notes.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=turmeric&backgroundColor=ffd700',
+    imageUrl: '⚪',
     verificationHash: '0xmnab5678cd901234ef567890gh123456ij789012',
     qualityGrade: 'AA',
     processingMethod: 'Traditional water-retting for 7 days, then sun-drying',
@@ -280,7 +280,7 @@ export const DEMO_PRODUCTS: MarketplaceProduct[] = [
     harvestDate: '2024-01-30',
     sealedAt: '2024-02-05',
     description: 'Premium vanilla pods (Vanilla planifolia) with 2.8% vanillin content. Hand-pollinated flowers, carefully cured for 6 months using traditional methods.',
-    imageUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=ginger&backgroundColor=cd853f',
+    imageUrl: '🍦',
     verificationHash: '0xopqr9012st345678uv901234wx567890yz123456',
     qualityGrade: 'AAA',
     processingMethod: '6-month traditional curing: blanching, sweating, drying, and conditioning',
@@ -305,21 +305,21 @@ export const DEMO_TESTIMONIALS = [
     restaurant: "The Spice Route, London",
     message: "Spiced Platform has revolutionized how we source authentic spices. The provenance tracking gives us complete confidence in quality and origin.",
     rating: 5,
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=ranjan-review&backgroundColor=d4c5b9"
+    image: "👨‍🍳"
   },
   {
     name: "Sarah Chen",
     business: "Artisan Spice Co.",
     message: "Being able to see the farmer's story and verify authenticity has been game-changing for our business. Our customers love the transparency.",
     rating: 5,
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=kamala-review&backgroundColor=ffd5dc"
+    image: "👩‍💼"
   },
   {
     name: "Dr. Raj Patel",
     specialty: "Ayurvedic Medicine",
     message: "The quality verification and traditional processing methods documented on this platform ensure we get medicinal-grade spices.",
     rating: 5,
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=mahesh-review&backgroundColor=a8e6cf"
+    image: "👨‍⚕️"
   }
 ]
 

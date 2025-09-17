@@ -15,8 +15,11 @@ const DashboardPage: React.FC = () => {
   } = useFirstTimeUser()
 
   useEffect(() => {
-    // Redirect to profile setup if this is a first-time verified user
-    if (needsProfileSetup) {
+    // Skip redirect in demo mode (for presentation)
+    const isDemoMode = router.query.demo === 'true' || process.env.NODE_ENV === 'development'
+
+    // Redirect to profile setup if this is a first-time verified user (unless in demo mode)
+    if (needsProfileSetup && !isDemoMode) {
       router.push('/onboarding/profile-setup')
       return
     }
